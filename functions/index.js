@@ -25,29 +25,29 @@ app.post('/login', (req, res) => {
     // check to see if that email and password exist in our db
     let user = users.find(user => user.email === email && user.password === password);
     if (!user) {
-        res.status(401).send('Invalid email or password!');
+        res.status(401).send({ error: 'Invalid email or password!' });
         return;
     }
     user.password = undefined; // remove password from the user object
     // now we want to sign / create a token...
     const token = jwt.sign(user, mySecretKey, { expiresIn: '1hr' });
-    res.send(token); // 
+    res.send({ token }); // 
 });
 
 app.get('/public', (req, res) => {
-    res.send('Welcome!'); // anyone can see this ...
+    res.send({ message: 'Welcome!' }); // anyone can see this ...
 });
 
 app.get('/private', (req, res) => {
     // let's require a valid token to see this 
     const token = req.headers.authorization || '';
     if (!token) {
-        res.status(401).send('You must be logged in to see this');
+        res.status(401).send({ error: 'You must be logged in to see this' });
         return;
     }
     jwt.verify(token, mySecretKey, (err, decoded) => {
         if (err) {
-            res.status(401).send('You must be logged in to see this');
+            res.status(401).send({ error: 'You must be logged in to see this' });
             return;
         }
         // here we know that the email is valid...
